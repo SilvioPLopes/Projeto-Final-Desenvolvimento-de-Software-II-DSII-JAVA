@@ -3,6 +3,7 @@ package br.edu.oficina.controller;
 import br.edu.oficina.service.ClienteDados;
 import br.edu.oficina.service.ClienteService;
 import jakarta.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -49,8 +50,14 @@ public class ClienteController {
 
     @PostMapping("/{id}/excluir")
     String excluir(@PathVariable Long id, RedirectAttributes redirect) {
-        clientes.excluir(id);
-        redirect.addFlashAttribute("mensagem", "Cliente excluído.");
+        boolean excluido;
+        try {
+            excluido = clientes.excluir(id);
+        } catch (DataIntegrityViolationException ex) {
+            excluido = false;
+        }
+        redirect.addFlashAttribute(excluido ? "mensagem" : "erro",
+            excluido ? "Cliente excluído." : "Exclua as ordens deste cliente antes de removê-lo.");
         return "redirect:/clientes";
     }
 

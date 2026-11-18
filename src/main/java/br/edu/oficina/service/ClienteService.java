@@ -3,6 +3,7 @@ package br.edu.oficina.service;
 import br.edu.oficina.model.Cliente;
 import br.edu.oficina.model.Endereco;
 import br.edu.oficina.repository.ClienteRepository;
+import br.edu.oficina.repository.OrdemServicoRepository;
 import java.util.List;
 import java.util.Locale;
 import org.springframework.data.domain.Sort;
@@ -15,9 +16,11 @@ import org.springframework.web.server.ResponseStatusException;
 @Transactional(readOnly = true)
 public class ClienteService {
     private final ClienteRepository clientes;
+    private final OrdemServicoRepository ordens;
 
-    public ClienteService(ClienteRepository clientes) {
+    public ClienteService(ClienteRepository clientes, OrdemServicoRepository ordens) {
         this.clientes = clientes;
+        this.ordens = ordens;
     }
 
     public List<Cliente> listar() {
@@ -42,7 +45,12 @@ public class ClienteService {
     }
 
     @Transactional
-    public void excluir(Long id) {
-        clientes.delete(buscar(id));
+    public boolean excluir(Long id) {
+        Cliente cliente = buscar(id);
+        if (ordens.existsByCliente_Id(id)) {
+            return false;
+        }
+        clientes.delete(cliente);
+        return true;
     }
 }
