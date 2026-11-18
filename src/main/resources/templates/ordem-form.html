@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: cabecalho('Cadastro de ordem')}"></head>
+<body>
+<header th:replace="~{layout :: menu}"></header>
+<main class="container">
+  <h1>Nova ordem</h1>
+  <div th:if="${clientes.empty}" class="aviso">
+    <a th:href="@{/clientes/novo}">Cadastre um cliente</a> para abrir uma ordem.
+  </div>
+  <form th:unless="${clientes.empty}" class="painel campos" method="post" th:object="${dados}"
+        th:action="@{/ordens/nova}">
+    <ul class="aviso erro" th:if="${#fields.hasAnyErrors()}" role="alert">
+      <li th:each="erro : ${#fields.detailedErrors()}" th:text="${erro.fieldName + ' — ' + erro.message}"></li>
+    </ul>
+    <div class="duas-colunas">
+      <label>Cliente
+        <select th:field="*{clienteId}" required>
+          <option value="">Selecione</option>
+          <option th:each="item : ${clientes}" th:value="${item.id}" th:text="${item.nome}"></option>
+        </select>
+      </label>
+      <label>Equipamento
+        <select th:field="*{equipamentoId}" required>
+          <option value="">Selecione</option>
+          <option th:each="item : ${equipamentos}" th:value="${item.id}" th:text="|${item.modelo} · ${item.categoria.nome}|"></option>
+        </select>
+      </label>
+      <label>Técnico
+        <select th:field="*{tecnicoId}" required>
+          <option value="">Selecione</option>
+          <option th:each="item : ${tecnicos}" th:value="${item.id}" th:text="${item.nome}"></option>
+        </select>
+      </label>
+      <label>Serviço
+        <select th:field="*{servicoId}" required>
+          <option value="">Selecione</option>
+          <option th:each="item : ${servicos}" th:value="${item.id}" th:text="${item.nome}"></option>
+        </select>
+      </label>
+    </div>
+    <label>Status
+      <select th:field="*{status}" required>
+        <option th:each="item : ${status}" th:value="${item.name()}" th:text="${item.rotulo}"></option>
+      </select>
+    </label>
+    <label>Descrição<textarea th:field="*{descricao}" rows="4" maxlength="500" required></textarea></label>
+    <div class="acoes"><button>Salvar</button><a th:href="@{/ordens}">Cancelar</a></div>
+  </form>
+</main>
+</body>
+</html>

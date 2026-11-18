@@ -6,6 +6,7 @@
 <main class="container">
   <div class="titulo">
     <h1>Ordens de serviço</h1>
+    <a sec:authorize="hasRole('ATENDENTE')" class="botao" th:href="@{/ordens/nova}">Nova ordem</a>
   </div>
   <div th:replace="~{layout :: mensagens}"></div>
   <p th:if="${ordens.empty}" class="painel">Nenhuma ordem cadastrada.</p>
