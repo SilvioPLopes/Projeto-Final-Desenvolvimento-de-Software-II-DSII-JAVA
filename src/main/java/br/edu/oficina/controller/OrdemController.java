@@ -37,21 +37,35 @@ public class OrdemController {
     @GetMapping("/nova")
     String nova(Model model) {
         model.addAttribute("dados", new OrdemDados(null, null, null, null, "", StatusOrdem.ABERTA));
-        return formulario(model);
+        return formulario(model, null);
     }
 
-    @PostMapping("/nova")
-    String salvar(@Valid @ModelAttribute("dados") OrdemDados dados,
+    @GetMapping("/{id}/editar")
+    String editar(@PathVariable Long id, Model model) {
+        model.addAttribute("dados", OrdemDados.de(ordens.buscar(id)));
+        return formulario(model, id);
+    }
+
+    @PostMapping({"/nova", "/{id}/editar"})
+    String salvar(@PathVariable(required = false) Long id, @Valid @ModelAttribute("dados") OrdemDados dados,
                   BindingResult erros, Model model, RedirectAttributes redirect) {
         if (erros.hasErrors()) {
-            return formulario(model);
+            return formulario(model, id);
         }
-        ordens.criar(dados);
+        ordens.salvar(id, dados);
         redirect.addFlashAttribute("mensagem", "Ordem salva.");
         return "redirect:/ordens";
     }
 
-    private String formulario(Model model) {
+    @PostMapping("/{id}/excluir")
+    String excluir(@PathVariable Long id, RedirectAttributes redirect) {
+        ordens.excluir(id);
+        redirect.addFlashAttribute("mensagem", "Ordem excluída.");
+        return "redirect:/ordens";
+    }
+
+    private String formulario(Model model, Long id) {
+        model.addAttribute("id", id);
         model.addAttribute("clientes", clientes.listar());
         model.addAttribute("equipamentos", ordens.equipamentos());
         model.addAttribute("tecnicos", ordens.tecnicos());

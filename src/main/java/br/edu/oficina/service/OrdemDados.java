@@ -1,5 +1,6 @@
 package br.edu.oficina.service;
 
+import br.edu.oficina.model.OrdemServico;
 import br.edu.oficina.model.StatusOrdem;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -14,4 +15,8 @@ public record OrdemDados(
     @NotBlank @Size(max = 500) String descricao,
     @NotNull StatusOrdem status
 ) {
+    public static OrdemDados de(OrdemServico ordem) {
+        return new OrdemDados(ordem.getCliente().getId(), ordem.getEquipamento().getId(),
+            ordem.getTecnico().getId(), ordem.getServico().getId(), ordem.getDescricao(), ordem.getStatus());
+    }
 }

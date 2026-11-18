@@ -16,6 +16,10 @@
     </dl>
     <div class="acoes">
       <a th:href="@{/ordens}">Voltar</a>
+      <a sec:authorize="hasRole('ATENDENTE')" th:href="@{/ordens/{id}/editar(id=${ordem.id})}">Editar</a>
+      <form sec:authorize="hasRole('ATENDENTE')" method="post" th:action="@{/ordens/{id}/excluir(id=${ordem.id})}">
+        <button class="perigo">Excluir</button>
+      </form>
     </div>
   </section>
 </main>

@@ -49,7 +49,7 @@ public class OrdemService {
     }
 
     @Transactional
-    public void criar(OrdemDados dados) {
+    public void salvar(Long id, OrdemDados dados) {
         Cliente cliente = clientes.buscar(dados.clienteId());
         Equipamento equipamento = equipamentos.findById(dados.equipamentoId())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Equipamento inválido."));
@@ -58,6 +58,15 @@ public class OrdemService {
         Servico servico = servicos.findById(dados.servicoId())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Serviço inválido."));
 
-        ordens.save(new OrdemServico(cliente, equipamento, tecnico, servico, dados.descricao().strip(), dados.status()));
+        if (id == null) {
+            ordens.save(new OrdemServico(cliente, equipamento, tecnico, servico, dados.descricao().strip(), dados.status()));
+        } else {
+            buscar(id).atualizar(cliente, equipamento, tecnico, servico, dados.descricao().strip(), dados.status());
+        }
+    }
+
+    @Transactional
+    public void excluir(Long id) {
+        ordens.delete(buscar(id));
     }
 }

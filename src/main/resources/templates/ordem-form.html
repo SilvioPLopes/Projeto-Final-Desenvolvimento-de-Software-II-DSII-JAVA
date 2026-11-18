@@ -4,12 +4,12 @@
 <body>
 <header th:replace="~{layout :: menu}"></header>
 <main class="container">
-  <h1>Nova ordem</h1>
+  <h1 th:text="${id == null ? 'Nova ordem' : 'Editar ordem'}"></h1>
   <div th:if="${clientes.empty}" class="aviso">
     <a th:href="@{/clientes/novo}">Cadastre um cliente</a> para abrir uma ordem.
   </div>
   <form th:unless="${clientes.empty}" class="painel campos" method="post" th:object="${dados}"
-        th:action="@{/ordens/nova}">
+        th:action="${id == null} ? @{/ordens/nova} : @{/ordens/{id}/editar(id=${id})}">
     <ul class="aviso erro" th:if="${#fields.hasAnyErrors()}" role="alert">
       <li th:each="erro : ${#fields.detailedErrors()}" th:text="${erro.fieldName + ' — ' + erro.message}"></li>
     </ul>
