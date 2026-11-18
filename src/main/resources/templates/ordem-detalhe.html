@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout :: cabecalho('Detalhes da ordem')}"></head>
+<body>
+<header th:replace="~{layout :: menu}"></header>
+<main class="container">
+  <h1 th:text="|Ordem #${ordem.id}|"></h1>
+  <section class="painel">
+    <dl>
+      <dt>Status</dt><dd th:text="${ordem.status.rotulo}"></dd>
+      <dt>Cliente</dt><dd th:text="${ordem.cliente.nome}"></dd>
+      <dt>Equipamento</dt><dd th:text="|${ordem.equipamento.modelo} · ${ordem.equipamento.categoria.nome}|"></dd>
+      <dt>Técnico</dt><dd th:text="${ordem.tecnico.nome}"></dd>
+      <dt>Serviço</dt><dd th:text="${ordem.servico.nome}"></dd>
+      <dt>Descrição</dt><dd class="descricao" th:text="${ordem.descricao}"></dd>
+    </dl>
+    <div class="acoes">
+      <a th:href="@{/ordens}">Voltar</a>
+    </div>
+  </section>
+</main>
+</body>
+</html>

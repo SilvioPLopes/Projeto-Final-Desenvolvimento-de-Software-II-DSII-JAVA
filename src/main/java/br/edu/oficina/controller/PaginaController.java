@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class PaginaController {
     @GetMapping("/")
     String inicio() {
-        return "redirect:/clientes";
+        return "redirect:/ordens";
     }
 
     @GetMapping("/saude")
