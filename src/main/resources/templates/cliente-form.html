@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: cabecalho('Cadastro de cliente')}"></head>
+<body>
+<header th:replace="~{layout :: menu}"></header>
+<main class="container">
+  <h1 th:text="${id == null ? 'Novo cliente' : 'Editar cliente'}"></h1>
+  <form class="painel campos" method="post" th:object="${dados}"
+        th:action="${id == null} ? @{/clientes/novo} : @{/clientes/{id}/editar(id=${id})}">
+    <ul class="aviso erro" th:if="${#fields.hasAnyErrors()}" role="alert">
+      <li th:each="erro : ${#fields.detailedErrors()}" th:text="${erro.fieldName + ' — ' + erro.message}"></li>
+    </ul>
+    <label>Nome<input th:field="*{nome}" maxlength="100" required></label>
+    <label>Telefone<input th:field="*{telefone}" type="tel" maxlength="25" required></label>
+    <fieldset>
+      <legend>Endereço</legend>
+      <div class="acoes">
+        <label>CEP<input th:field="*{cep}" placeholder="01001-000" inputmode="numeric" maxlength="9" required></label>
+      </div>
+      <div class="duas-colunas">
+        <label>Logradouro<input th:field="*{logradouro}" maxlength="120" required></label>
+        <label>Número<input th:field="*{numero}" maxlength="20" required></label>
+        <label>Cidade<input th:field="*{cidade}" maxlength="100" required></label>
+        <label>UF<input th:field="*{uf}" maxlength="2" required></label>
+      </div>
+    </fieldset>
+    <div class="acoes"><button>Salvar</button><a th:href="@{/clientes}">Cancelar</a></div>
+  </form>
+</main>
+</body>
+</html>

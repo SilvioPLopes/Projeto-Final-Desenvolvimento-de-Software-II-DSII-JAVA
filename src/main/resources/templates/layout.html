@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="cabecalho(titulo)">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${titulo + ' · Oficina OS'}">Oficina OS</title>
+  <link rel="stylesheet" th:href="@{/estilo.css}">
+</head>
+<body>
+<header th:fragment="menu" class="barra">
+  <nav class="container" aria-label="Principal">
+    <a th:href="@{/clientes}" class="marca">Oficina OS</a>
+    <a th:href="@{/clientes}">Clientes</a>
+  </nav>
+</header>
+<div th:fragment="mensagens">
+  <p th:if="${mensagem}" th:text="${mensagem}" class="aviso" role="status"></p>
+  <p th:if="${erro}" th:text="${erro}" class="aviso erro" role="alert"></p>
+</div>
+</body>
+</html>

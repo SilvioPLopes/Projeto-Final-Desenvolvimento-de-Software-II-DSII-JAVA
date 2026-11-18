@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout :: cabecalho('Clientes')}"></head>
+<body>
+<header th:replace="~{layout :: menu}"></header>
+<main class="container">
+  <div class="titulo">
+    <h1>Clientes</h1>
+    <a sec:authorize="hasRole('ATENDENTE')" class="botao" th:href="@{/clientes/novo}">Novo cliente</a>
+  </div>
+  <div th:replace="~{layout :: mensagens}"></div>
+  <p th:if="${clientes.empty}" class="painel">Nenhum cliente cadastrado.</p>
+  <div th:unless="${clientes.empty}" class="tabela">
+    <table>
+      <thead><tr><th>Nome</th><th>Telefone</th><th>Endereço</th><th sec:authorize="hasRole('ATENDENTE')">Ações</th></tr></thead>
+      <tbody>
+        <tr th:each="cliente : ${clientes}">
+          <td th:text="${cliente.nome}"></td>
+          <td th:text="${cliente.telefone}"></td>
+          <td th:text="|${cliente.endereco.logradouro}, ${cliente.endereco.numero} · ${cliente.endereco.cidade}/${cliente.endereco.uf}|"></td>
+          <td sec:authorize="hasRole('ATENDENTE')">
+            <div class="acoes">
+              <a th:href="@{/clientes/{id}/editar(id=${cliente.id})}">Editar</a>
+              <form method="post" th:action="@{/clientes/{id}/excluir(id=${cliente.id})}">
+                <button class="perigo" type="submit">Excluir</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+</body>
+</html>

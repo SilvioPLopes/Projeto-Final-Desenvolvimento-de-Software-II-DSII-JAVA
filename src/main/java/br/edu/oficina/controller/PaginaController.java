@@ -6,6 +6,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class PaginaController {
+    @GetMapping("/")
+    String inicio() {
+        return "redirect:/clientes";
+    }
+
     @GetMapping("/saude")
     @ResponseBody
     String saude() {
