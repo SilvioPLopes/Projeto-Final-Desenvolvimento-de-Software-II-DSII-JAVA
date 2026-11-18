@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: cabecalho('Entrar')}"></head>
+<body>
+<main class="container estreito">
+  <section class="painel">
+    <h1>Oficina OS</h1>
+    <p th:if="${param.error}" class="aviso erro" role="alert">Usuário ou senha inválidos.</p>
+    <p th:if="${param.logout}" class="aviso" role="status">Sessão encerrada.</p>
+    <form class="campos" method="post" th:action="@{/login}">
+      <label>Usuário<input name="username" autocomplete="username" required autofocus></label>
+      <label>Senha<input type="password" name="password" autocomplete="current-password" required></label>
+      <div><button>Entrar</button></div>
+    </form>
+  </section>
+</main>
+</body>
+</html>

@@ -11,6 +11,11 @@ public class PaginaController {
         return "redirect:/ordens";
     }
 
+    @GetMapping("/login")
+    String login() {
+        return "login";
+    }
+
     @GetMapping("/saude")
     @ResponseBody
     String saude() {
