@@ -2,16 +2,25 @@ package br.edu.oficina;
 
 import br.edu.oficina.model.StatusOrdem;
 import br.edu.oficina.repository.*;
+import com.sun.net.httpserver.HttpServer;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -23,12 +32,44 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @AutoConfigureMockMvc
 class OficinaIntegrationTest {
+    private static final HttpServer viaCep = iniciarViaCep();
+
     @Autowired MockMvc mvc;
     @Autowired ClienteRepository clientes;
     @Autowired OrdemServicoRepository ordens;
     @Autowired EquipamentoRepository equipamentos;
     @Autowired TecnicoRepository tecnicos;
     @Autowired ServicoRepository servicos;
+
+    @DynamicPropertySource
+    static void configurarViaCep(DynamicPropertyRegistry propriedades) {
+        propriedades.add("app.viacep.url", () -> "http://127.0.0.1:" + viaCep.getAddress().getPort());
+    }
+
+    @AfterAll
+    static void pararViaCep() {
+        viaCep.stop(0);
+    }
+
+    @Test
+    void autenticaERestringeAcessoDeConsulta() throws Exception {
+        mvc.perform(get("/ordens"))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("http://localhost/login"));
+        mvc.perform(get("/login"))
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("Oficina OS")));
+        mvc.perform(formLogin("/login").user("atendente").password("atendente-teste"))
+            .andExpect(authenticated().withRoles("ATENDENTE"));
+        mvc.perform(get("/ordens").with(user("consulta").roles("CONSULTA")))
+            .andExpect(status().isOk());
+        mvc.perform(get("/ordens/nova").with(user("consulta").roles("CONSULTA")))
+            .andExpect(status().isForbidden());
+        mvc.perform(post("/ordens/nova").with(user("consulta").roles("CONSULTA")).with(csrf()))
+            .andExpect(status().isForbidden());
+        mvc.perform(post("/ordens/nova").with(user("atendente").roles("ATENDENTE")))
+            .andExpect(status().isForbidden());
+    }
 
     @Test
     void cadastraEditaConsultaEExcluiClientesEOrdens() throws Exception {
@@ -77,6 +118,19 @@ class OficinaIntegrationTest {
         assertThat(clientes.existsById(clienteId)).isFalse();
     }
 
+    @Test
+    void consultaViaCepPorHttpETrataCepInvalidoOuAusente() throws Exception {
+        mvc.perform(get("/api/cep/01001-000").with(user("atendente").roles("ATENDENTE")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.logradouro").value("Praça da Sé"))
+            .andExpect(jsonPath("$.cidade").value("São Paulo"))
+            .andExpect(jsonPath("$.uf").value("SP"));
+        mvc.perform(get("/api/cep/00000000").with(user("atendente").roles("ATENDENTE")))
+            .andExpect(status().isNotFound());
+        mvc.perform(get("/api/cep/12").with(user("atendente").roles("ATENDENTE")))
+            .andExpect(status().isBadRequest());
+    }
+
     private MockHttpServletRequestBuilder clienteForm(String url, String nome) {
         return post(url).with(user("atendente").roles("ATENDENTE")).with(csrf())
             .param("nome", nome).param("telefone", "11999990000").param("cep", "01001-000")
@@ -91,5 +145,26 @@ class OficinaIntegrationTest {
             .param("tecnicoId", tecnicos.findAll().get(0).getId().toString())
             .param("servicoId", servicos.findAll().get(0).getId().toString())
             .param("descricao", descricao).param("status", status);
+    }
+
+    private static HttpServer iniciarViaCep() {
+        try {
+            HttpServer servidor = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+            servidor.createContext("/ws/", troca -> {
+                String corpo = troca.getRequestURI().getPath().equals("/ws/01001000/json/")
+                    ? "{\"logradouro\":\"Praça da Sé\",\"localidade\":\"São Paulo\",\"uf\":\"SP\"}"
+                    : "{\"erro\":true}";
+                byte[] bytes = corpo.getBytes(StandardCharsets.UTF_8);
+                troca.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
+                troca.sendResponseHeaders(200, bytes.length);
+                try (var saida = troca.getResponseBody()) {
+                    saida.write(bytes);
+                }
+            });
+            servidor.start();
+            return servidor;
+        } catch (IOException ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 }
