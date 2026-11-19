@@ -16,7 +16,9 @@
       <legend>Endereço</legend>
       <div class="acoes">
         <label>CEP<input th:field="*{cep}" placeholder="01001-000" inputmode="numeric" maxlength="9" required></label>
+        <button type="button" id="buscar-cep" class="secundario" th:data-url="@{/api/cep/}">Buscar CEP</button>
       </div>
+      <p id="retorno-cep" role="status"></p>
       <div class="duas-colunas">
         <label>Logradouro<input th:field="*{logradouro}" maxlength="120" required></label>
         <label>Número<input th:field="*{numero}" maxlength="20" required></label>
@@ -27,5 +29,6 @@
     <div class="acoes"><button>Salvar</button><a th:href="@{/clientes}">Cancelar</a></div>
   </form>
 </main>
+<script th:src="@{/cep.js}"></script>
 </body>
 </html>

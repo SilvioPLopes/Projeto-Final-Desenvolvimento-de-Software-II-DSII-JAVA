@@ -31,7 +31,8 @@ public class SegurancaConfig {
     SecurityFilterChain acesso(HttpSecurity http) throws Exception {
         return http.authorizeHttpRequests(regra -> regra
                 .requestMatchers("/login", "/estilo.css", "/saude").permitAll()
-                .requestMatchers("/clientes/novo", "/clientes/*/editar", "/ordens/nova", "/ordens/*/editar").hasRole("ATENDENTE")
+                .requestMatchers("/clientes/novo", "/clientes/*/editar", "/ordens/nova", "/ordens/*/editar",
+                                 "/api/cep/**").hasRole("ATENDENTE")
                 .requestMatchers(HttpMethod.POST, "/clientes/**", "/ordens/**").hasRole("ATENDENTE")
                 .anyRequest().authenticated())
             .formLogin(login -> login.loginPage("/login").defaultSuccessUrl("/ordens"))
